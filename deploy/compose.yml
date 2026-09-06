@@ -14,7 +14,7 @@ services:
     volumes:
       # Le homeserver se change ici, sans rebuilder l image : on edite
       # config.json sur la VM et on redemarre le conteneur.
-      - ./config.json:/tmp/element-web-config/config.json:ro
+      - ./config.json:/app/config.json:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/config.json || exit 1"]
       interval: 10s
