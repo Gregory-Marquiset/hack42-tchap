@@ -1,40 +1,35 @@
-# A poser sur caddy-01 (VM 105). Certificats via HTTP-01 : les ports 80 et 443
-# de la bbox sont deja rediriges vers caddy-01, donc ca marche tel quel.
+# Fragment a AJOUTER au Caddyfile de caddy-01 (VM 105, /home/greg/caddy/Caddyfile).
+# Ne pas remplacer le fichier : il sert deja d autres sites en production.
 #
-# Tant que tu regles la conf, decommente cette ligne pour ne pas cramer les
-# quotas Let s Encrypt (les certificats seront invalides dans le navigateur,
-# c est normal) :
-# {
-# 	acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
-# }
+# Deployer :
+#   cp Caddyfile Caddyfile.bak-$(date +%F-%H%M)
+#   cat fragment >> Caddyfile
+#   docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+#   docker exec caddy caddy reload   --config /etc/caddy/Caddyfile
+#
+# Le hash est volontairement absent de ce depot public. Le generer avec :
+#   docker exec caddy caddy hash-password
 
-(commun) {
-	encode zstd gzip
-	log {
-		output file /var/log/caddy/{args[0]}.log
-	}
-	header {
-		Strict-Transport-Security "max-age=31536000"
-		X-Content-Type-Options nosniff
-		Referrer-Policy strict-origin-when-cross-origin
-	}
+# AUTHENTIFICATION SUR LES DEUX, y compris la prod : config.json pointe pour
+# l'instant sur le vrai homeserver de l'Etat (matrix.agent.tchap.gouv.fr). Une
+# page de login aux couleurs de Tchap, en libre acces sur un domaine duckdns et
+# branchee sur le service reel, serait indiscernable d'un site de phishing.
+# A retirer le jour ou config.json pointera sur notre propre homeserver de test.
+(hack42_auth) {
+    basic_auth {
+        hack42 REMPLACER_PAR_LE_HASH
+    }
+    header X-Robots-Tag "noindex, nofollow"
+    encode zstd gzip
 }
 
 hack-prod.duckdns.org {
-	import commun prod
-	reverse_proxy 192.168.1.130:8080
+    import hack42_auth
+    reverse_proxy 192.168.1.130:8080
 }
 
 hack-staging.duckdns.org {
-	import commun staging
-
-	# Staging joignable mais ni indexe ni ouvert a tout le monde.
-	header X-Robots-Tag "noindex, nofollow"
-	header X-Environment staging
-	basicauth {
-		# Generer le hash avec : docker run --rm caddy caddy hash-password
-		hack42 $2a$14$REMPLACER_PAR_LE_HASH
-	}
-
-	reverse_proxy 192.168.1.131:8080
+    import hack42_auth
+    header X-Environment staging
+    reverse_proxy 192.168.1.131:8080
 }

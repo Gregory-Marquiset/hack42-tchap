@@ -15,24 +15,19 @@ IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${SHA}"
 REMOTE_DIR=/opt/hack42
 
 case "$ENVIRONMENT" in
-  staging)
-    APP_HOST="deploy@192.168.1.131"
-    URL="https://hack-staging.duckdns.org/config.json"
-    ;;
-  prod)
-    APP_HOST="deploy@192.168.1.130"
-    URL="https://hack-prod.duckdns.org/config.json"
-    ;;
+  staging) APP_IP=192.168.1.131 ;;
+  prod)    APP_IP=192.168.1.130 ;;
   *) echo "environnement inconnu: $ENVIRONMENT" >&2; exit 1 ;;
 esac
 
 echo "==> $ENVIRONMENT : $IMAGE"
 
-# Le .env vit uniquement sur la VM, jamais dans le depot ni dans la CI.
-ssh -o StrictHostKeyChecking=accept-new "$APP_HOST" bash -euo pipefail <<REMOTE
+# Le config.json vit uniquement sur la VM : changer de homeserver ne demande
+# ni rebuild ni commit.
+ssh -o StrictHostKeyChecking=accept-new "deploy@$APP_IP" bash -euo pipefail <<REMOTE
   cd "$REMOTE_DIR"
 
-  # Trace de ce qui tourne, pour pouvoir revenir en arriere a la main :
+  # Trace de ce qui tourne, pour revenir en arriere a la main :
   #   export APP_IMAGE=\$(cat .image.previous) && docker compose up -d
   if [ -f .image ]; then cp .image .image.previous; fi
   echo "$IMAGE" > .image
@@ -43,15 +38,15 @@ ssh -o StrictHostKeyChecking=accept-new "$APP_HOST" bash -euo pipefail <<REMOTE
   docker image prune -f
 REMOTE
 
-# Smoke test : si /healthz ne repond pas, le job echoue et tu le vois tout de
-# suite, pas au moment de la demo.
+# Smoke test SUR LA VM, pas sur l URL publique : Caddy y impose une basic auth,
+# et on veut verifier l application, pas le reverse proxy.
 for i in $(seq 1 20); do
-  if curl -fsS --max-time 5 "$URL" >/dev/null; then
-    echo "==> $ENVIRONMENT en ligne ($URL)"
+  if curl -fsS --max-time 5 "http://$APP_IP:8080/config.json" >/dev/null; then
+    echo "==> $ENVIRONMENT en ligne (http://$APP_IP:8080)"
     exit 0
   fi
   sleep 3
 done
 
-echo "==> $ENVIRONMENT ne repond pas sur $URL" >&2
+echo "==> $ENVIRONMENT ne repond pas sur http://$APP_IP:8080/config.json" >&2
 exit 1
