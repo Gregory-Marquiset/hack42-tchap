@@ -1,0 +1,22 @@
+# Tchap web est un frontend statique : pas de base de donnees, juste nginx.
+# Deployee a l identique sur hack-prod-01 et hack-staging-01, seul le .env change.
+services:
+  app:
+    image: ${APP_IMAGE:?APP_IMAGE manquant - deploy.sh l exporte}
+    restart: unless-stopped
+    environment:
+      # Le template nginx de l image lit cette variable au demarrage.
+      ELEMENT_WEB_PORT: 3000
+    ports:
+      # Ecoute sur le LAN : caddy-01 (192.168.1.105) vient taper ici depuis
+      # une autre machine. Le pare-feu Proxmox restreint l acces.
+      - "8080:3000"
+    volumes:
+      # Le homeserver se change ici, sans rebuilder l image : on edite
+      # config.json sur la VM et on redemarre le conteneur.
+      - ./config.json:/tmp/element-web-config/config.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/config.json || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

@@ -1,0 +1,11 @@
+# /etc/systemd/system/duckdns.timer  (+ duckdns.service qui lance le script)
+# systemctl enable --now duckdns.timer
+[Unit]
+Description=Mise a jour DuckDNS
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

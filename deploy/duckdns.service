@@ -1,0 +1,8 @@
+# /etc/systemd/system/duckdns.service
+[Unit]
+Description=Mise a jour DuckDNS
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/duckdns-update.sh
