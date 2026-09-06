@@ -9,7 +9,9 @@ set -euo pipefail
 ENVIRONMENT="${1:?usage: deploy.sh <staging|prod> <sha>}"
 SHA="${2:?usage: deploy.sh <staging|prod> <sha>}"
 
-IMAGE="ghcr.io/${GITHUB_REPOSITORY:?}:${SHA}"
+# ghcr.io refuse les majuscules, et le compte GitHub en a une.
+: "${GITHUB_REPOSITORY:?}"
+IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${SHA}"
 REMOTE_DIR=/opt/hack42
 
 case "$ENVIRONMENT" in

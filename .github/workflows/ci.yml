@@ -2,11 +2,20 @@ name: CI
 
 on:
   push:
-    branches: [develop_tchap]
+    branches: [develop_tchap]   # -> staging, automatique
+    tags: ['v*']                # -> prod, apres approbation
   pull_request:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environnement a deployer
+        required: true
+        default: staging
+        type: choice
+        options: [staging, prod]
 
-# Jamais pull_request_target ici : ce workflow tourne sur les runners publics
-# GitHub, et il ne doit JAMAIS atterrir sur le runner self-hosted (cf. README).
+# Jamais pull_request_target : les jobs de deploiement tournent sur le runner
+# self-hosted, dans le LAN. Une PR venant d un fork ne doit jamais y toucher.
 permissions:
   contents: read
   packages: write
@@ -17,22 +26,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO le jour ou l app existe, remplacer ce bloc par le vrai
-      # lint + tests (Node/pnpm ou Python/Django selon la stack retenue).
+      # TODO brancher sur les vrais lint/tests du depot une fois que la
+      # chaine complete sera validee (pnpm install prend plusieurs minutes).
       - name: Placeholder
-        run: echo "pas encore de tests - l app n existe pas"
+        run: echo "pas encore de tests"
 
   image:
-    # On ne publie une image que sur develop_tchap : les PR sont juste testees.
     if: github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.nom.outputs.image }}
     steps:
       - uses: actions/checkout@v4
         with:
           # Le build bind-monte .git et estampille la version avec git describe :
           # un clone superficiel le ferait echouer.
           fetch-depth: 0
+
+      # ghcr.io refuse les majuscules, et le compte GitHub en a une.
+      - id: nom
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -44,14 +58,40 @@ jobs:
 
       - uses: docker/build-push-action@v6
         with:
-          # Le Dockerfile est fourni par le depot ; le contexte doit etre la
-          # racine du monorepo, et .git doit rester dedans (le build le
-          # bind-monte pour estampiller la version).
+          # Dockerfile fourni par le depot ; le contexte doit etre la racine
+          # du monorepo, et .git doit rester dedans.
           context: .
           file: apps/web/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:edge
+            ${{ steps.nom.outputs.image }}:${{ github.sha }}
+            ${{ steps.nom.outputs.image }}:edge
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Les deux jobs suivants tournent sur le runner self-hosted et attendent
+  # que l image soit publiee : c est tout l interet de les avoir mis ici
+  # plutot que dans un workflow separe, qui se declenchait en parallele.
+  staging:
+    if: github.ref == 'refs/heads/develop_tchap' || inputs.target == 'staging'
+    needs: image
+    runs-on: [self-hosted, linux, x64]
+    environment:
+      name: staging
+      url: https://hack-staging.duckdns.org
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./deploy/deploy.sh staging "${{ github.sha }}"
+
+  prod:
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.target == 'prod'
+    needs: image
+    runs-on: [self-hosted, linux, x64]
+    environment:
+      # Mettre un required reviewer sur cet environment dans les settings :
+      # c est ce qui empeche un deploiement prod pendant la demo.
+      name: prod
+      url: https://hack-prod.duckdns.org
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./deploy/deploy.sh prod "${{ github.sha }}"
