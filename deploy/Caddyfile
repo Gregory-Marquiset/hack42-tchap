@@ -25,7 +25,7 @@
 
 hack-prod.duckdns.org {
     import hack42_auth
-    reverse_proxy 192.168.1.130:8080
+    reverse_proxy 192.168.1.130:8090
 }
 
 hack-staging.duckdns.org {
