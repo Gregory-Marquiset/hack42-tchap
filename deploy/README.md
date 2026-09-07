@@ -9,16 +9,13 @@ celui de Tchap, le remplacer créerait un conflit à chaque `git merge upstream`
 
 ### Comptes existants
 
-`matorgue`, `lnunez`, `gmarquis`, `cdutel` — mot de passe `Hack42Test!`.
-Identifiant Matrix complet : `@matorgue:hack-tchap.duckdns.org`.
+Allez sur `https://hack-staging.duckdns.org` ensuite connecter vous en utilisant se format `login@tchapgouv.com` puis votre login et le mot de passe envoyer en priver.
+
+Vous ne faite pas partie de l'equipe de developement vous pouvez utiliser les compte `demo1` à `demo5` avec le mail `demo*@tchapgouv.com` puis le pass `Hack42Demo2026`
 
 MAS ne sait pas supprimer un compte, seulement le verrouiller — une suppression
 directe en base casserait les references cote Synapse. Le compte `greg` initial
 est donc verrouille, pas efface.
-
-Une authentification HTTP (`hack42` / `w5jxsrrjaP`) protège les interfaces web.
-Elle est demandée par le navigateur **avant** l'écran de connexion. Elle n'est
-pas sur `matrix.` ni `auth.`, donc elle ne gêne pas les clients mobiles.
 
 ### Sur PC
 
