@@ -63,6 +63,43 @@ const TchapFooter = (): ReactElement => {
     return (
         <footer className="fr-footer lasuite lasuite-footer tc_footer_wrapper" role="contentinfo" id="footer-7475">
             <div className="fr-container lasuite-container">
+                {/* Challenge La Suite Numerique x 42 — Oleron, 14-18 septembre 2026.
+                    Styles en ligne volontairement : evite de passer par rethemendex
+                    et le pipeline CSS pour un bandeau de quelques lignes. */}
+                <div
+                    className="tc_hack42_banner"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "16px 0",
+                        borderBottom: "1px solid rgba(0,0,0,0.1)",
+                    }}
+                >
+                    {/* Logo officiel de 42. viewBox resserree sur le trace : celle du
+                        fichier d origine (0 -200 960 960) laisse une large marge vide.
+                        fill="currentColor" pour suivre le theme clair ou sombre. */}
+                    <svg
+                        viewBox="0 -60 960 650"
+                        width="56"
+                        height="38"
+                        role="img"
+                        aria-label="42"
+                        fill="currentColor"
+                        style={{ flexShrink: 0 }}
+                    >
+                        <polygon points="32,412.6 362.1,412.6 362.1,578 526.8,578 526.8,279.1 197.3,279.1 526.8,-51.1 362.1,-51.1 32,279.1" />
+                        <polygon points="597.9,114.2 762.7,-51.1 597.9,-51.1" />
+                        <polygon points="762.7,114.2 597.9,279.1 597.9,443.9 762.7,443.9 762.7,279.1 928,114.2 928,-51.1 762.7,-51.1" />
+                        <polygon points="928,279.1 762.7,443.9 928,443.9" />
+                    </svg>
+                    <div>
+                        <div style={{ fontWeight: 700 }}>42 | DINUM challenge septembre 2026</div>
+                        <div style={{ fontSize: "0.9em", opacity: 0.7 }}>
+                            par cdutel, lnunez, matorgue et gmarquis
+                        </div>
+                    </div>
+                </div>
                 <div className="fr-footer__body">
                     <div className="fr-footer__brand">
                         <p className="fr-logo">
