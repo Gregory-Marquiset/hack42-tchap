@@ -9,25 +9,13 @@ celui de Tchap, le remplacer créerait un conflit à chaque `git merge upstream`
 
 ### Comptes existants
 
-Allez sur `https://hack-staging.duckdns.org` ensuite connecter vous en utilisant se format `login@tchapgouv.com` puis votre login et le mot de passe envoyer en priver.
+Allez sur `https://hack-prod.duckdns.org` ensuite connecter vous en utilisant se format `login@tchapgouv.com` puis votre login et le mot de passe envoyer en priver.
 
 Vous ne faite pas partie de l'equipe de developement vous pouvez utiliser les compte `demo1` à `demo5` avec le mail `demo*@tchapgouv.com` puis le pass `Hack42Demo2026`
 
 MAS ne sait pas supprimer un compte, seulement le verrouiller — une suppression
 directe en base casserait les references cote Synapse. Le compte `greg` initial
 est donc verrouille, pas efface.
-
-### Sur PC
-
-| Adresse | Quoi |
-|---|---|
-| `https://hack-staging.duckdns.org` | notre fork, déployé automatiquement |
-| `https://element.hack-tchap.duckdns.org` | client Tchap de référence, non modifié |
-| `https://mail.hack-tchap.duckdns.org` | tous les mails envoyés par le serveur |
-
-Vérifier en bas de l'écran de connexion que le serveur annoncé est
-`hack-tchap.duckdns.org`. Si c'est `agent.tchap.gouv.fr`, le `config.json` de la
-VM pointe encore sur le service réel de l'État — ne pas saisir d'identifiants.
 
 ### Sur téléphone
 
@@ -67,7 +55,13 @@ Il n'y a **pas de captcha** sur l'inscription publique. Pour la fermer :
 
 ---
 
-## 2. Développer en local
+## 2. Développer
+
+### Sur staging
+
+Si vous avez push et valider la CI vous pourrez voir le staging en live ici `https://hack-staging.duckdns.org` le process de login est le meme avec une auth en plus pour l'equipe de dev
+
+### en local
 
 Pour voir ses modifications sans passer par la CI et le déploiement, qui prennent
 une dizaine de minutes à chaque essai.
@@ -120,6 +114,19 @@ code d'Element amont. Deux repères utiles :
 à cause de la version épinglée, ouvrir le terminal en administrateur le temps du
 `corepack enable`, une seule fois.
 
+### les adresses
+
+| Adresse | Quoi |
+|---|---|
+| `https://hack-prod.duckdns.org` | notre version prod, déployé automatiquement |
+| `https://hack-staging.duckdns.org` | notre fork en cour de developement, déployé automatiquement |
+| `https://element.hack-tchap.duckdns.org` | client Tchap de référence, non modifié |
+| `https://mail.hack-tchap.duckdns.org` | tous les mails envoyés par le serveur |
+
+Vérifier en bas de l'écran de connexion que le serveur annoncé est
+`hack-tchap.duckdns.org`. Si c'est `agent.tchap.gouv.fr`, le `config.json` de la
+VM pointe encore sur le service réel de l'État — ne pas saisir d'identifiants.
+
 ---
 
 ## 3. Topologie
@@ -127,7 +134,7 @@ code d'Element amont. Deux repères utiles :
 ```
 GitHub Actions (runners publics)   lint → build image → GHCR
          │
-         ▼ push develop_tchap / tag v*
+         ▼ push mglc_hack42_develop_tchap / tag v*
 gh-runner-ubuntu  192.168.1.112    runner self-hosted, ssh vers les VM
          │
          ├──────────────────────────┬──────────────────────────
@@ -153,7 +160,7 @@ Hôte Proxmox : `marquis`, 192.168.1.200.
 | Événement | Effet |
 |---|---|
 | pull request | tests seulement, runners publics |
-| push sur `develop_tchap` | build, publication GHCR, déploiement staging |
+| push sur `mglc_hack42_develop_tchap` | build, publication GHCR, déploiement staging |
 | tag `vX.Y.Z` | déploiement prod, après approbation |
 
 L'image est construite par la CI et publiée sur GHCR ; les VM ne font que
