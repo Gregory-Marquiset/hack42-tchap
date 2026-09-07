@@ -67,7 +67,62 @@ Il n'y a **pas de captcha** sur l'inscription publique. Pour la fermer :
 
 ---
 
-## 2. Topologie
+## 2. Développer en local
+
+Pour voir ses modifications sans passer par la CI et le déploiement, qui prennent
+une dizaine de minutes à chaque essai.
+
+Prérequis : **Node 24**. La version de pnpm est épinglée à 10.33 par le champ
+`packageManager` du `package.json` racine — corepack la télécharge tout seul, il
+n'y a pas à l'installer.
+
+```bash
+pnpm install          # a la racine du depot, ~10 min et plusieurs Go la 1re fois
+cd apps/web && pnpm start
+```
+
+Le client est servi sur `http://localhost:8080`, avec rechargement automatique à
+chaque sauvegarde.
+
+### Pointer le dev local sur notre homeserver
+
+Par défaut le client de dev utilise `config.sample.json`, qui ne connaît pas
+notre serveur. Créer `apps/web/config.json` — il est déjà dans le `.gitignore`,
+aucun risque de le committer :
+
+```json
+{
+    "default_server_config": {
+        "m.homeserver": {
+            "base_url": "https://matrix.hack-tchap.duckdns.org",
+            "server_name": "Tchap gouv 1"
+        },
+        "m.identity_server": {
+            "base_url": "https://matrix.hack-tchap.duckdns.org"
+        }
+    },
+    "brand": "Tchap"
+}
+```
+
+### Où se trouve quoi
+
+Le code propre à Tchap est isolé dans `apps/web/src/tchap/`, le reste est le
+code d'Element amont. Deux repères utiles :
+
+- `src/tchap/components/views/common/TchapFooter.tsx` — le pied de page de
+  l'écran de connexion, où se trouve le bandeau du challenge
+- `src/components/structures/auth/` — les écrans de connexion et d'inscription
+
+### Sur Windows
+
+`corepack enable` échoue sans droits administrateur. Si pnpm refuse de démarrer
+à cause de la version épinglée, ouvrir le terminal en administrateur le temps du
+`corepack enable`, une seule fois.
+
+---
+
+## 3. Topologie
 
 ```
 GitHub Actions (runners publics)   lint → build image → GHCR
@@ -108,7 +163,7 @@ prend plusieurs minutes et immobiliserait la VM, et un retour arrière se résum
 
 ---
 
-## 3. Ce qui tourne sur la VM 130
+## 4. Ce qui tourne sur la VM 130
 
 Stack `tchapgouv/tchap-docker-integration`, dans `~/tchap-dev` :
 Synapse, MAS, Keycloak (mock ProConnect), serveur d'identité mocké, client
@@ -116,7 +171,7 @@ Tchap, PostgreSQL, Redis, mailpit, nginx, Element Call, LiveKit.
 
 Trois fichiers nous appartiennent et ne viennent pas de l'amont :
 
-- `compose.linux.yml` — nos correctifs (voir section 5)
+- `compose.linux.yml` — nos correctifs (voir section 6)
 - `tchap/synapse/Dockerfile` — Synapse plus les cinq modules Tchap
 - `data-template/livekit/config.yaml` — port média modifié
 
@@ -145,7 +200,7 @@ docker build --build-arg SYNAPSE_VERSION="$SYNAPSE_VERSION" \
 
 ---
 
-## 4. Décisions et leurs raisons
+## 5. Décisions et leurs raisons
 
 **Un homeserver à nous plutôt que le vrai Tchap.** Au départ le `config.json`
 pointait sur `matrix.agent.tchap.gouv.fr`. Deux problèmes : on ne peut rien
@@ -182,7 +237,7 @@ postes changent au gré du DHCP.
 
 ---
 
-## 5. Problèmes rencontrés
+## 6. Problèmes rencontrés
 
 ### Perte de données silencieuse — le plus coûteux
 
@@ -278,7 +333,7 @@ pointe ailleurs.
 
 ---
 
-## 6. Automatismes
+## 7. Automatismes
 
 `duckdns.timer` sur `marquis`, toutes les 5 minutes : met à jour les trois
 domaines. Token en `/etc/duckdns.token`.
@@ -291,7 +346,7 @@ recrée le conteneur.
 
 ---
 
-## 7. Opérations courantes
+## 8. Opérations courantes
 
 ```bash
 # état de la stack
