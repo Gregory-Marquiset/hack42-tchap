@@ -96,7 +96,7 @@ const TchapFooter = (): ReactElement => {
                     <div>
                         <div style={{ fontWeight: 700 }}>42 | DINUM challenge septembre 2026</div>
                         <div style={{ fontSize: "0.9em", opacity: 0.7 }}>
-                            par cdutel, lnunez, matorgue, gmarquis et michen
+                            par cdutel, lnunez, matorgue, gmarquis, michen et aykrifa
                         </div>
                     </div>
                 </div>
