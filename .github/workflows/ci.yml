@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [mglc_hack42_develop_tchap]   # -> staging, automatique
+    branches: [mmalgc_hack42_develop_tchap]   # -> staging, automatique
     tags: ['v*']                # -> prod, apres approbation
   pull_request:
   workflow_dispatch:
@@ -73,7 +73,7 @@ jobs:
   # que l image soit publiee : c est tout l interet de les avoir mis ici
   # plutot que dans un workflow separe, qui se declenchait en parallele.
   staging:
-    if: github.ref == 'refs/heads/mglc_hack42_develop_tchap' || inputs.target == 'staging'
+    if: github.ref == 'refs/heads/mmalgc_hack42_develop_tchap' || inputs.target == 'staging'
     needs: image
     runs-on: [self-hosted, linux, x64]
     environment:

@@ -137,7 +137,7 @@ VM pointe encore sur le service réel de l'État — ne pas saisir d'identifiant
 ```
 GitHub Actions (runners publics)   lint → build image → GHCR
          │
-         ▼ push mglc_hack42_develop_tchap / tag v*
+         ▼ push mmalgc_hack42_develop_tchap / tag v*
 gh-runner-ubuntu  192.168.1.112    runner self-hosted, ssh vers les VM
          │
          ├──────────────────────────┬──────────────────────────
@@ -163,7 +163,7 @@ Hôte Proxmox : `marquis`, 192.168.1.200.
 | Événement | Effet |
 |---|---|
 | pull request | tests seulement, runners publics |
-| push sur `mglc_hack42_develop_tchap` | build, publication GHCR, déploiement staging |
+| push sur `mmalgc_hack42_develop_tchap` | build, publication GHCR, déploiement staging |
 | tag `vX.Y.Z` | déploiement prod, après approbation |
 
 L'image est construite par la CI et publiée sur GHCR ; les VM ne font que
