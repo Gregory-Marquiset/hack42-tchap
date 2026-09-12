@@ -3,6 +3,14 @@
 Ce fichier est dans `deploy/` et non à la racine : le `README.md` du dépôt est
 celui de Tchap, le remplacer créerait un conflit à chaque `git merge upstream`.
 
+Les bots qui peuplent le serveur — comptes tirés de l'annuaire, simulateur
+d'activité, réponses en salon et en message privé, tableau de bord — vivent
+dans un dépôt séparé et privé :
+[`hack42-bots`](https://github.com/Gregory-Marquiset/hack42-bots). Séparé
+parce que ce dépôt-ci est un *fork* de Tchap et reçoit des `git merge
+upstream` ; privé parce que sa documentation décrit la topologie interne du
+serveur.
+
 ---
 
 ## 1. Se connecter
@@ -340,6 +348,38 @@ pointe ailleurs.
 - `email_account_validity` n'embarque pas ses gabarits d'email dans la roue :
   Synapse refusait de démarrer sur un dossier `templates` introuvable. Ils sont
   copiés depuis l'archive du dépôt.
+
+### Mentions refusées par Synapse
+
+Tout message contenant une mention était rejeté avec
+`400 - 1 validation error for Mentions`, côté client comme côté API. Les bots
+passaient, eux, parce qu'ils n'envoient jamais de mention.
+
+Enchaînement : nos cinq modules enregistrent `check_event_allowed`, donc Synapse
+**gèle** chaque événement avant d'appeler les modules, pour qu'ils ne soient pas
+tentés de le modifier. Le contenu devient alors un `immutabledict` et ses listes
+des tuples. Le validateur passe ensuite `m.mentions` à pydantic, qui refuse les
+deux formes.
+
+Sans module, l'événement n'est pas gelé : le bug ne se déclenche pas, ce qui
+explique qu'il survive en amont.
+
+Corrigé dans `tchap/synapse/Dockerfile` : on dégèle ce seul champ avec
+`unfreeze()`, que Synapse fournit déjà. Vérifié sur quatre cas — mention
+nominative, `m.mentions` vide, `@room`, et mention malformée qui doit rester
+refusée.
+
+Fausse piste au passage : pydantic avait été épinglé sous 2.12 avant d'avoir
+identifié le gel. Sans effet, l'épingle a été retirée.
+
+### Jointures en rafale du simulateur
+
+Le simulateur rejoignait le salon **avant chaque message**. Il saturait
+`rc_joins.local`, et les `429` retombaient aussi sur les comptes humains : 118
+erreurs Synapse en trois minutes.
+
+Il demande maintenant `/joined_rooms` à la prise de poste et ne rejoint que ce
+qui manque. Zéro erreur sur cinq minutes d'observation, simulateur actif.
 
 ---
 
