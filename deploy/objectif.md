@@ -93,7 +93,8 @@ salon, inviter, et lancer les commandes utiles.
 
 Une alerte de supervision, un ticket, un déploiement rien n'arrive dans
 Tchap tout seul. Et inversement, une application externe ne peut pas réagir à
-ce qui se dit dans un salon.
+ce qui se dit dans un salon. Même d'une conversation à l'autre, rien ne
+circule: le lien d'un message collé en MP reste une adresse illisible.
 
 **Ce qui existe.** Deux sens, un seul mécanisme. Pour l'entrant,
 `matrix-hookshot` (matrix-org) est le pont de référence une adresse de webhook
@@ -121,6 +122,41 @@ poster.
 4. Regrouper une alerte qui boucle doit **éditer** son message (`m.replace`) au lieu d'en poster un nouveau, et une résolution répondre dans le fil de l'alerte d'origine.
 5. Sortant Synapse pousse les événements par `PUT /_matrix/app/v1/transactions/{txnId}`; l'AS filtre selon les abonnements et relaie en `POST` vers l'adresse externe, signé HMAC pour que le destinataire puisse vérifier l'origine.
 6. Salons chiffrés activer `msc2409_to_device_messages_enabled` et `msc3202_transaction_extensions` dans `experimental_features`, puis donner un device à l'AS la même logique que nos bots en MP. Pour la démo, un salon d'astreinte public évite ce détour.
+
+### Citer un message d'un salon dans un MP
+
+On colle en MP le lien d'un message publié dans un salon, et le destinataire
+voit le message cité, pas une adresse.
+
+**Ce qui existe.** Le lien d'un message existe déjà dans Matrix,
+`<permalink_prefix>/#/<salon>/<événement>`, et notre Tchap a son
+`permalink_prefix` configuré. Le transfert aussi: `ForwardDialog` est dans le
+fork. Et le serveur fait déjà respecter les droits, vérifié sur notre serveur:
+`GET /rooms/{salon}/event/{événement}` rend le message à un membre du salon
+(200) et répond `404 Event not found` à un non-membre, sans même confirmer que
+le message existe.
+
+**Ce qu'on construit.** Dans le MP, le client repère le lien, va chercher
+l'événement avec le jeton **du destinataire**, le déchiffre sur place et
+l'affiche comme une citation: auteur, salon, date, extrait, et un clic qui ouvre
+le message dans son fil.
+
+**Le piège.** Le chiffrement, et c'est lui qui décide de tout. Le serveur ne
+lit pas le message cité: tout se passe dans le client du destinataire. Trois
+cas à afficher franchement. Membre qui a les clés: la citation. Membre arrivé
+après le message dans un salon chiffré: en général il n'a pas les clés, le
+message reste illisible. Non-membre: rien, et c'est voulu.
+Tentation à écarter: recopier le texte cité dans le MP pour que ça marche
+toujours. Le texte serait bien chiffré, mais il sortirait de son salon vers
+quelqu'un qui n'y a pas droit. C'est le rôle du transfert, un geste explicite,
+pas celui d'un aperçu automatique.
+
+**La marche à suivre.**
+1. Repérer le lien dans le corps du MP: même domaine que `permalink_prefix`, forme `/#/<salon>/<événement>`.
+2. Côté destinataire, `GET /_matrix/client/v3/rooms/{salon}/event/{événement}`. 200, on a l'événement. 404, afficher «message non accessible», sans rien révéler de plus.
+3. Événement de type `m.room.encrypted`: le déchiffrer avec les clés locales, le SDK sait le faire. Échec, afficher «message chiffré, clés indisponibles».
+4. Rendre la carte de citation avec les composants du UI kit. Le clic ouvre le salon au bon endroit par `GET /rooms/{salon}/context/{événement}`, le même appel qu'au chantier 7.
+5. Mettre en cache par identifiant d'événement, et invalider si le message est modifié (`m.replace`) ou supprimé (rédaction): une citation ne doit pas survivre à l'original.
 
 ---
 
@@ -268,6 +304,8 @@ Les chantiers 1, 2, 5, 6 et 7 sont côté client, dans `tchap-web-v4`. Le 2 est 
 
 Les chantiers 3, 3bis et 4 sont côté serveur application service et module
 Synapse. Ils demandent du Python et une compréhension de Matrix, pas de front.
+Exception: la citation de message du 3bis est entièrement côté client, et ne
+dépend pas du 3.
 
 Le 8 est à cheval : le panneau et l'événement d'état côté client, l'appel à
 l'API de Docs pour accorder les droits côté serveur.
