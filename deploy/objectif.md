@@ -175,9 +175,7 @@ règles par défaut à l'inscription. La DINUM a la même issue ouverte sur Hub.
 
 Pas d'indicateur de disponibilité, et rien qui dise la fonction des gens.
 
-**Ce qui existe.** Matrix gère la présence nativement, et l'indicateur de
-disponibilité est sur la feuille de route Tchap pour ce semestre donc validé
-comme utile, mais pas fait.
+**Ce qui existe.** Matrix gère la présence nativement, et l'indicateur de disponibilité est sur la feuille de route Tchap pour ce semestre donc validé comme utile, mais pas fait. Regarde aussi la commande `p-e lié` qui récupére la géolocalisation.
 
 **Ce qu'on construit.** Un statut disponible/absent/occupé, et un encart de
 fonction à côté du nom: «CTO DINUM», «RH MASA», «stagiaire MINARM».
@@ -207,6 +205,7 @@ que ce que le serveur peut lire, et on garde le chiffrement de bout en bout.
 Vérifié sur notre serveur: un mot envoyé dans un salon public ressort dans des
 centaines de résultats, le même mot envoyé en message privé chiffré en donne
 **zéro** alors que le destinataire, lui, le lit sans peine.
+Regarde la version desktop qui possede deja cette fonction apparement.
 
 **Ce qu'on construit.** La recherche se fait donc entièrement dans le
 navigateur, sur ce que l'utilisateur a déjà le droit de lire. Un index local
