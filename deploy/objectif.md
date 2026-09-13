@@ -9,6 +9,8 @@ gestion de réunion. Ce qui compte, c'est que ça tourne le vendredi.
 Neuf chantiers. Pour chacun: ce qui existe déjà, ce qu'on construit, et le
 piège à connaître.
 
+skill libs officiel a utiliser absolument https://github.com/etalab-ia/skills
+
 ---
 
 ## 1. L'affichage est brouillon
@@ -82,7 +84,7 @@ salon, inviter, et lancer les commandes utiles.
 **La marche à suivre.**
 1. Écrire le registre YAML de l'AS : `id`, `as_token`, `hs_token`, `sender_localpart`, et les `namespaces` de comptes et de salons qu'il pilote.
 2. Le déclarer dans `app_service_config_files` du `homeserver.yaml`, puis redémarrer Synapse.
-3. L'AS appelle ensuite les endpoints Matrix habituels avec son `as_token`, et ajoute `?user_id=` pour agir au nom d'un compte de son namespace — sans mot de passe et sans connexion.
+3. L'AS appelle ensuite les endpoints Matrix habituels avec son `as_token`, et ajoute `?user_id=` pour agir au nom d'un compte de son namespace sans mot de passe et sans connexion.
 4. Poser par-dessus une petite API métier: créer un salon, inviter, lancer une commande. C'est elle que le front appelle, jamais Matrix directement.
 
 ---
