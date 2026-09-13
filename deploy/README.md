@@ -22,11 +22,10 @@ Allez sur `https://hack-prod.duckdns.org` ensuite connecter vous en utilisant se
 Comptes de l'equipe de developpement : `matorgue`, `lnunez`, `gmarquis`,
 `cdutel`, `michen`, `aykrifa`.
 
-Vous ne faite pas partie de l'equipe de developement vous pouvez utiliser les compte `demo1` à `demo5` avec le mail `demo*@tchapgouv.com` puis le pass `Hack42Demo2026`
+Vous ne faite pas partie de l'equipe de developement vous pouvez utiliser les compte `demo0` à `demo9` avec le mail `demo*@tchapgouv.com` puis le pass `Hack42Demo2026`
 
 MAS ne sait pas supprimer un compte, seulement le verrouiller — une suppression
-directe en base casserait les references cote Synapse. Le compte `greg` initial
-est donc verrouille, pas efface.
+directe en base casserait les references cote Synapse.
 
 ### Sur téléphone
 
